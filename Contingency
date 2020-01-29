@@ -1,0 +1,43 @@
+def ContingencyAnalysis(Netw):
+    
+    OverloadLines   =[]
+    OverLoadTrafos  =[]
+    OverVoltageBuses=[]
+    OverLoad        =[]
+    AllOverloads    =[]
+  
+    for bus in Netw.res_bus.iterrows():
+        indexb  = bus[0]
+        vm_pu  = bus[1].vm_pu    
+       
+        if  (vm_pu >1.1 or vm_pu < 0.9):
+       
+                temp_data = {'Name': Netw.bus.name[indexb],
+                           'Type': 'BU',
+                           'Serial': '0',
+                           'Mag': vm_pu}
+                OverVoltageBuses.append(temp_data)
+                      
+    for trafo in Netw.res_trafo.iterrows():
+        indext  = trafo[0]
+        loadingt = trafo[1].loading_percent 
+        if loadingt>100:
+            temp_data = {'Name': Netw.trafo.name[indext],
+                           'Type': 'TR',
+                           'Serial': '1',
+                           'Mag': loadingt/100}
+            OverLoadTrafos.append(temp_data)
+                
+    for line in Netw.res_line.iterrows():
+        indexl = line[0]
+        loadingl = line [1].loading_percent
+        if loadingl>100:
+            
+            temp_data = {'Name': Netw.line.name[indexl],
+                           'Type': 'LN',
+                           'Serial': '2',
+                           'Mag': loadingl/100}
+            OverloadLines.append(temp_data)
+            
+    AllOverloads=OverVoltageBuses+OverloadLines+OverLoadTrafos
+    df         =pd.DataFrame(AllOverloads)
